@@ -75,15 +75,7 @@
     <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js"></script>
 
     <script type="text/javascript">
-data = {
-1: {
-  'id': 1,
-  'url': 'http://xkcd.com',
-  'title': 'xkcd',
-  'tags': ['humor', 'comic'],
-  'note': 'This is my note for this bookmark.',
-},
-};
+var bookmarks;
 
 // TODO implement this
 function paragraphify(str) {
@@ -110,15 +102,26 @@ function tableRowFromBookmark(mark) {
   return tableRow;
 }
 
+function loadData(location) {
+  $.ajax(location, {dataType: 'json'})
+    .success(function (loadedData) {
+      bookmarks = loadedData;
+      updateSearch([], '');
+    })
+    .error(function (error) {
+      alert("Unable to load data from " + location);
+    });
+}
+
 function updateSearch(tags, query) {
   $('#bookmark-table tbody').html('');
-  for (mark in data) {
-    $('#bookmark-table tbody').append(tableRowFromBookmark(data[mark]));
+  for (mark in bookmarks) {
+    $('#bookmark-table tbody').append(tableRowFromBookmark(bookmarks[mark]));
   }
 }
 
 $(function() {
-  updateSearch([], '');
+  loadData(location.hash.substring(1));
 });
     </script>
   </body>
