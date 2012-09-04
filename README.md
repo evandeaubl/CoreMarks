@@ -10,7 +10,7 @@ you've already written them yourself.
 
 ## How to run
 
-1. Copy the index.html to a WebDAV server.
+1. Copy the index.html and jquery.timeago.js to a WebDAV server.
 2. Create a JSON file on the same WebDAV server (cross-domain requests are not
 currently supported).
 3. Load the index.html in a web browser, adding a hash at the end with the

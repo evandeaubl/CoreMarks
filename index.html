@@ -25,6 +25,9 @@
         font-size: 90%;
         color: #333;
       }
+      .bookmark-age {
+        font-size: 83%;
+      }
       a.delete {
         color: #a00;
       }
@@ -73,6 +76,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js"></script>
+    <script src="jquery.timeago.js"></script>
 
     <script type="text/javascript">
 var bookmarks;
@@ -83,7 +87,7 @@ function paragraphify(str) {
 }
 
 function tableRowFromBookmark(mark) {
-  var bookmarkLink, bookmarkTags, bookmarkNote, optionButton, optionMenu;
+  var bookmarkLink, bookmarkTags, bookmarkNote, bookmarkAge, optionButton, optionMenu;
   optionMenu = $('<ul>').addClass('dropdown-menu')
     .append($('<li>').append($('<a>').attr('href', '#').attr('id', 'bookmark-edit').append('Edit')))
     .append($('<li>').append($('<a>').attr('href', '#').attr('id', 'bookmark-delete').addClass('delete').append('Delete')));
@@ -97,7 +101,10 @@ function tableRowFromBookmark(mark) {
   if (mark['note'] != undefined && mark['note'] != '') {
     bookmarkNote = $('<div>').addClass('bookmark-note').append(paragraphify(mark['note']));
   }
-  tableRow = $('<tr>').append($('<td>').append(optionButton).append(bookmarkLink).append(bookmarkTags).append(bookmarkNote));
+  if (mark['added'] != undefined && mark['added'] != '') {
+    bookmarkAge = $('<div>').addClass('bookmark-age').addClass('muted').append($('<abbr>').addClass('timeago').attr('title', mark['added']));
+  }
+  tableRow = $('<tr>').append($('<td>').append(optionButton).append(bookmarkLink).append(bookmarkTags).append(bookmarkNote).append(bookmarkAge));
   $.data(tableRow, 'id', mark['id']);
   return tableRow;
 }
@@ -118,6 +125,7 @@ function updateSearch(tags, query) {
   for (mark in bookmarks) {
     $('#bookmark-table tbody').append(tableRowFromBookmark(bookmarks[mark]));
   }
+  $('abbr.timeago').timeago();
 }
 
 $(function() {
