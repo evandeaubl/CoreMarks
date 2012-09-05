@@ -89,13 +89,13 @@ function paragraphify(str) {
 function tableRowFromBookmark(mark) {
   var bookmarkLink, bookmarkTags, bookmarkNote, bookmarkAge, optionButton, optionMenu;
   optionMenu = $('<ul>').addClass('dropdown-menu')
-    .append($('<li>').append($('<a>').attr('href', '#').attr('id', 'bookmark-edit').append('Edit')))
-    .append($('<li>').append($('<a>').attr('href', '#').attr('id', 'bookmark-delete').addClass('delete').append('Delete')));
+    .append($('<li>').append($('<a>').attr('href', '#').attr('class', 'bookmark-edit').append('Edit')))
+    .append($('<li>').append($('<a>').attr('href', '#').attr('class', 'bookmark-delete').addClass('delete').append('Delete')));
   optionButton = $('<div>').addClass('pull-right').append($('<div>').addClass('btn-group').append($('<a>').addClass('btn').addClass('dropdown-toggle').attr('data-toggle', 'dropdown').attr('href', '#').append('<i class="icon-cog"></i> <span class="caret"></span>')).append(optionMenu));
   bookmarkLink = $('<div>').addClass('bookmark-link').append($('<a>').attr('href', mark['url']).append(mark['title']));
   bookmarkTags = $('<div>').addClass('bookmark-tags');
   for (tag in mark['tags']) {
-    bookmarkTags.append($('<a>').attr('href', '#').attr('id', 'tag-' + mark['tags'][tag]).append(mark['tags'][tag]))
+    bookmarkTags.append($('<a>').attr('href', '#').attr('class', 'tag-' + mark['tags'][tag]).append(mark['tags'][tag]))
     bookmarkTags.append(' ')
   }
   if (mark['note'] != undefined && mark['note'] != '') {
@@ -105,7 +105,7 @@ function tableRowFromBookmark(mark) {
     bookmarkAge = $('<div>').addClass('bookmark-age').addClass('muted').append($('<abbr>').addClass('timeago').attr('title', mark['added']));
   }
   tableRow = $('<tr>').append($('<td>').append(optionButton).append(bookmarkLink).append(bookmarkTags).append(bookmarkNote).append(bookmarkAge));
-  $.data(tableRow, 'id', mark['id']);
+  tableRow.data('id', mark['id']);
   return tableRow;
 }
 
@@ -126,6 +126,15 @@ function updateSearch(tags, query) {
     $('#bookmark-table tbody').append(tableRowFromBookmark(bookmarks[mark]));
   }
   $('abbr.timeago').timeago();
+  $('.bookmark-delete').click(function() {
+    if (confirm("Delete this bookmark?")) {
+      var tableRow = $(this).parent().parent().parent().parent().parent().parent();
+      var id = tableRow.data('id');
+      delete bookmarks[id];
+      tableRow.remove();
+    }
+    return false;
+  });
 }
 
 $(function() {
