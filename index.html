@@ -31,6 +31,12 @@
       a.delete {
         color: #a00;
       }
+      .nav-controls li {
+        padding-bottom: .75em;
+      }
+      .fill-width {
+        width: 100%;
+      }
     </style>
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -65,8 +71,9 @@
         </div><!--/span-->
         <div class="span3">
           <div class="well sidebar-nav">
-            <ul class="nav nav-list">
-              <li><input type="text" placeholder="Search"></li>
+            <ul class="nav nav-list nav-controls">
+              <li><button style="width: 100%;" class="btn" id="new-bookmark-button"><i class="icon-plus"></i> New Bookmark</button></li>
+              <li><input style="width: 95%;" type="text" placeholder="Search"></li>
             </ul>
           </div><!--/.well -->
         </div><!--/span-->
@@ -81,7 +88,7 @@
     <script type="text/javascript">
 var bookmarks;
 
-// TODO implement this
+// TODO implement this - maybe do full Markdown processing?
 function paragraphify(str) {
   return str;
 }
@@ -109,6 +116,36 @@ function tableRowFromBookmark(mark) {
   return tableRow;
 }
 
+function buildBookmarkForm(mark, saveFunc, cancelFunc) {
+  var bookmarkForm, bookmarkTitle, bookmarkLink, bookmarkTags, bookmarkNote, submitButton, cancelButton, leftColumn, rightColumn;
+  bookmarkTitle = $('<input>').attr('type', 'text').attr('name', 'title').attr('placeholder', 'Title').addClass('fill-width');
+  bookmarkLink = $('<input>').attr('type', 'text').attr('name', 'url').attr('placeholder', 'Address').addClass('fill-width');
+  bookmarkTags = $('<input>').attr('type', 'text').attr('name', 'tags').attr('placeholder', 'Tags').addClass('fill-width');
+  bookmarkNote = $('<textarea>').attr('type', 'text').attr('name', 'note').attr('placeholder', 'Note').attr('rows', '5').addClass('fill-width');
+  submitButton = $('<input>').attr('type', 'submit').attr('name', 'save').attr('value', 'Save');
+  cancelButton = $('<input>').attr('type', 'submit').attr('name', 'cancel').attr('value', 'Cancel');
+  
+  leftColumn = $('<div>').addClass('span6');
+  leftColumn.append(bookmarkTitle).append(bookmarkLink).append(bookmarkTags);
+  rightColumn = $('<div>').addClass('span6');
+  rightColumn.append(bookmarkNote).append($('<div>').addClass('pull-right').append(submitButton).append(' ').append(cancelButton));
+
+  bookmarkForm = $('<form>').attr('action', '').append(leftColumn).append(rightColumn);
+  if (mark != undefined) {
+    bookmarkTitle.append(mark['title']);
+    bookmarkLink.append(mark['url']);
+    bookmarkTags.append(mark['tags'].join(' '));
+    bookmarkNote.append(mark['note']);
+    bookmarkForm.data('id', mark['id']);
+  }
+  submitButton.click(saveFunc);
+  cancelButton.click(cancelFunc);
+  return bookmarkForm;
+}
+
+function processBookmarkForm() {
+}
+
 function loadData(location) {
   $.ajax(location, {dataType: 'json'})
     .success(function (loadedData) {
@@ -120,13 +157,9 @@ function loadData(location) {
     });
 }
 
-function updateSearch(tags, query) {
-  $('#bookmark-table tbody').html('');
-  for (mark in bookmarks) {
-    $('#bookmark-table tbody').append(tableRowFromBookmark(bookmarks[mark]));
-  }
-  $('abbr.timeago').timeago();
-  $('.bookmark-delete').click(function() {
+function activateRows(top) {
+  top.find('abbr.timeago').timeago();
+  top.find('.bookmark-delete').click(function() {
     if (confirm("Delete this bookmark?")) {
       var tableRow = $(this).parent().parent().parent().parent().parent().parent();
       var id = tableRow.data('id');
@@ -137,8 +170,40 @@ function updateSearch(tags, query) {
   });
 }
 
+function updateSearch(tags, query) {
+  $('#bookmark-table tbody').html('');
+  for (mark in bookmarks) {
+    $('#bookmark-table tbody').append(tableRowFromBookmark(bookmarks[mark]));
+  }
+  activateRows($('#bookmark-table tbody'));
+}
+
 $(function() {
   loadData(location.hash.substring(1));
+});
+$(function() {
+  $('#new-bookmark-button').click(function() {
+    form = buildBookmarkForm(undefined, function() {
+      new_mark = {
+        id: '' + new Date().getTime(),
+        title: form.find('[name="title"]').val(),
+        url: form.find('[name="url"]').val(),
+        tags: form.find('[name="tags"]').val().split(' '),
+        note: form.find('[name="note"]').val(),
+        added: new Date(),
+      };
+      bookmarks[new_mark.id] = new_mark;
+      tablerow = tableRowFromBookmark(new_mark);
+      $('#bookmark-table tbody').prepend(tablerow);
+      activateRows(tablerow);
+      form.parent().remove();
+      return false;
+    }, function() {
+      form.parent().remove();
+      return false;
+    });
+    $('div.span9').prepend($('<div>').addClass('well').append(form).append($('<br clear="both">')));
+  });
 });
     </script>
   </body>
