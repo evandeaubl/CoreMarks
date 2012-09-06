@@ -126,16 +126,16 @@ function buildBookmarkForm(mark, saveFunc, cancelFunc) {
   submitButton = $('<input>').attr('type', 'submit').attr('name', 'save').attr('value', 'Save');
   cancelButton = $('<input>').attr('type', 'submit').attr('name', 'cancel').attr('value', 'Cancel');
   
-  leftColumn = $('<div>').addClass('span6');
+  leftColumn = $('<div>').attr('style', 'width: 48%; float: left;');
   leftColumn.append(bookmarkTitle).append(bookmarkLink).append(bookmarkTags);
-  rightColumn = $('<div>').addClass('span6');
+  rightColumn = $('<div>').attr('style', 'width: 48%; float: right;');
   rightColumn.append(bookmarkNote).append($('<div>').addClass('pull-right').append(submitButton).append(' ').append(cancelButton));
 
   bookmarkForm = $('<form>').attr('action', '').append(leftColumn).append(rightColumn);
   if (mark != undefined) {
-    bookmarkTitle.append(mark['title']);
-    bookmarkLink.append(mark['url']);
-    bookmarkTags.append(mark['tags'].join(' '));
+    bookmarkTitle.attr('value', mark['title']);
+    bookmarkLink.attr('value', mark['url']);
+    bookmarkTags.attr('value', mark['tags'].join(' '));
     bookmarkNote.append(mark['note']);
     bookmarkForm.data('id', mark['id']);
   }
@@ -167,6 +167,38 @@ function activateRows(top) {
       delete bookmarks[id];
       tableRow.remove();
     }
+    return false;
+  });
+  top.find('.bookmark-edit').click(function() {
+    var button = $(this);
+    var tableCell = $(this).parent().parent().parent().parent().parent();
+    var id = tableCell.parent().data('id');
+    var savedChildren;
+    var form = buildBookmarkForm(bookmarks[id], function () {
+      new_mark = {
+        id: id,
+        title: form.find('[name="title"]').val(),
+        url: form.find('[name="url"]').val(),
+        tags: form.find('[name="tags"]').val().split(' '),
+        note: form.find('[name="note"]').val(),
+        added: bookmarks[id].added,
+      };
+      bookmarks[new_mark.id] = new_mark;
+      tablerow = tableRowFromBookmark(new_mark);
+      form.remove();
+      tableCell.append(tablerow.children().children());
+      activateRows(tableCell);
+      return false;
+    }, function() {
+      form.remove();
+      tableCell.append(savedChildren);
+      button.trigger('click');
+      activateRows(tableCell);
+      return false;
+    });
+    savedChildren = tableCell.children();
+    savedChildren.remove();
+    tableCell.append(form);
     return false;
   });
 }
