@@ -87,6 +87,7 @@
 
     <script type="text/javascript">
 var bookmarks;
+var newBookmarkFormVisible = false;
 
 // TODO implement this - maybe do full Markdown processing?
 function paragraphify(str) {
@@ -183,6 +184,9 @@ $(function() {
 });
 $(function() {
   $('#new-bookmark-button').click(function() {
+    if (newBookmarkFormVisible) {
+      return false;
+    }
     form = buildBookmarkForm(undefined, function() {
       new_mark = {
         id: '' + new Date().getTime(),
@@ -197,12 +201,16 @@ $(function() {
       $('#bookmark-table tbody').prepend(tablerow);
       activateRows(tablerow);
       form.parent().remove();
+      newBookmarkFormVisible = false;
       return false;
     }, function() {
       form.parent().remove();
+      newBookmarkFormVisible = false;
       return false;
     });
     $('div.span9').prepend($('<div>').addClass('well').append(form).append($('<br clear="both">')));
+    newBookmarkFormVisible = true;
+    return false;
   });
 });
     </script>
