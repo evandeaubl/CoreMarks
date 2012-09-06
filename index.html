@@ -76,6 +76,11 @@
               <li><input style="width: 95%;" type="text" placeholder="Search"></li>
             </ul>
           </div><!--/.well -->
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list nav-controls">
+              <li><input id="load-bookmark-file" style="width: 95%;" type="text" placeholder="Load Bookmark File (http://, dropbox:)"></li>
+            </ul>
+          </div>
         </div><!--/span-->
       </div><!--/row-->
 
@@ -83,6 +88,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropbox.js/0.5.0/dropbox.min.js"></script>
     <script src="jquery.timeago.js"></script>
 
     <script type="text/javascript">
@@ -144,18 +150,38 @@ function buildBookmarkForm(mark, saveFunc, cancelFunc) {
   return bookmarkForm;
 }
 
-function processBookmarkForm() {
-}
-
 function loadData(location) {
-  $.ajax(location, {dataType: 'json'})
-    .success(function (loadedData) {
-      bookmarks = loadedData;
-      updateSearch([], '');
-    })
-    .error(function (error) {
-      alert("Unable to load data from " + location);
+  function loadSuccess(loadedData) {
+    bookmarks = loadedData;
+    updateSearch([], '');
+  }
+
+  function loadError(error) {
+    alert("Unable to load data from " + location);
+  }
+
+  if (location.substring(0,8) == 'dropbox:') {
+    var client = new Dropbox.Client({
+      key: "5yh74qo22xd3q8z", secret: "fubnfyhikdp9jqw", sandbox: true,
     });
+    client.authDriver(new Dropbox.Drivers.Redirect());
+
+    client.authenticate(function(error, client) {
+      if (error) {
+        return loadError(error);
+      }
+
+      client.readFile(location.substring(8), function(error, data) {
+        if (error) {
+          loadError(error);
+        }
+
+        loadSuccess($.parseJSON(data));
+      });
+    });
+  } else if (location.substring(0,5) == 'http:' || location.substring(0,6) == 'https:' ) {
+    $.ajax(location.substring(location.indexOf(':') + 1), {dataType: 'json'}).success(loadSuccess).error(loadError);
+  }
 }
 
 function activateRows(top) {
@@ -212,8 +238,14 @@ function updateSearch(tags, query) {
 }
 
 $(function() {
-  loadData(location.hash.substring(1));
+  $('#load-bookmark-file').keypress(function(evt) {
+    if (evt.which == 13) {
+      loadData($(this).val());
+      return false;
+    }
+  });
 });
+
 $(function() {
   $('#new-bookmark-button').click(function() {
     if (newBookmarkFormVisible) {
