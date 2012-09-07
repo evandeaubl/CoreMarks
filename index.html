@@ -201,6 +201,7 @@ function activateRows(top) {
       var tableRow = $(this).parent().parent().parent().parent().parent().parent();
       var id = tableRow.data('id');
       delete bookmarks[id];
+      setTimeout(function() {saveData($('#load-bookmark-file').val())}, 1000);
       tableRow.remove();
     }
     return false;
