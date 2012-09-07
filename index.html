@@ -94,6 +94,7 @@
     <script type="text/javascript">
 var bookmarks;
 var newBookmarkFormVisible = false;
+var client;
 
 // TODO implement this - maybe do full Markdown processing?
 function paragraphify(str) {
@@ -161,11 +162,6 @@ function loadData(location) {
   }
 
   if (location.substring(0,8) == 'dropbox:') {
-    var client = new Dropbox.Client({
-      key: "5yh74qo22xd3q8z", secret: "fubnfyhikdp9jqw", sandbox: true,
-    });
-    client.authDriver(new Dropbox.Drivers.Redirect());
-
     client.authenticate(function(error, client) {
       if (error) {
         return loadError(error);
@@ -181,6 +177,20 @@ function loadData(location) {
     });
   } else if (location.substring(0,5) == 'http:' || location.substring(0,6) == 'https:' ) {
     $.ajax(location.substring(location.indexOf(':') + 1), {dataType: 'json'}).success(loadSuccess).error(loadError);
+  }
+}
+
+function saveData(location) {
+  function saveError(error) {
+    alert("Unable to load data from " + location);
+  }
+
+  if (location.substring(0,8) == 'dropbox:') {
+    client.writeFile(location.substring(8), JSON.stringify(bookmarks), function(error) {
+      if (error) {
+        saveError(error);
+      }
+    });
   }
 }
 
@@ -214,6 +224,7 @@ function activateRows(top) {
       form.remove();
       tableCell.append(tablerow.children().children());
       activateRows(tableCell);
+      setTimeout(function() {saveData($('#load-bookmark-file').val())}, 1000);
       return false;
     }, function() {
       form.remove();
@@ -264,6 +275,7 @@ $(function() {
       tablerow = tableRowFromBookmark(new_mark);
       $('#bookmark-table tbody').prepend(tablerow);
       activateRows(tablerow);
+      setTimeout(function() {saveData($('#load-bookmark-file').val())}, 1000);
       form.parent().remove();
       newBookmarkFormVisible = false;
       return false;
@@ -276,6 +288,13 @@ $(function() {
     newBookmarkFormVisible = true;
     return false;
   });
+});
+
+$(function() {
+  client = new Dropbox.Client({
+    key: "5yh74qo22xd3q8z", secret: "fubnfyhikdp9jqw", sandbox: true,
+  });
+  client.authDriver(new Dropbox.Drivers.Redirect());
 });
     </script>
   </body>
