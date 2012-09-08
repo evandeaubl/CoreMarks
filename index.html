@@ -107,7 +107,7 @@ function tableRowFromBookmark(mark) {
     .append($('<li>').append($('<a>').attr('href', '#').attr('class', 'bookmark-edit').append('Edit')))
     .append($('<li>').append($('<a>').attr('href', '#').attr('class', 'bookmark-delete').addClass('delete').append('Delete')));
   optionButton = $('<div>').addClass('pull-right').append($('<div>').addClass('btn-group').append($('<a>').addClass('btn').addClass('dropdown-toggle').attr('data-toggle', 'dropdown').attr('href', '#').append('<i class="icon-cog"></i> <span class="caret"></span>')).append(optionMenu));
-  bookmarkLink = $('<div>').addClass('bookmark-link').append($('<a>').attr('href', mark['url']).append(mark['title']));
+  bookmarkLink = $('<div>').addClass('bookmark-link').append($('<a>').attr('target', '_blank').attr('href', mark['url']).append(mark['title']));
   bookmarkTags = $('<div>').addClass('bookmark-tags');
   for (tag in mark['tags']) {
     bookmarkTags.append($('<a>').attr('href', '#').attr('class', 'tag-' + mark['tags'][tag]).append(mark['tags'][tag]))
