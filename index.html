@@ -154,6 +154,7 @@ function buildBookmarkForm(mark, saveFunc, cancelFunc) {
 function loadData(location) {
   function loadSuccess(loadedData) {
     bookmarks = loadedData;
+    localStorage.setItem('CoreMarks.lastLoaded', location);
     updateSearch([], '');
   }
 
@@ -296,6 +297,13 @@ $(function() {
     key: "5yh74qo22xd3q8z", secret: "fubnfyhikdp9jqw", sandbox: true,
   });
   client.authDriver(new Dropbox.Drivers.Redirect());
+});
+
+$(function() {
+  if (localStorage.getItem('CoreMarks.lastLoaded')) {
+    $('#load-bookmark-file').val(localStorage.getItem('CoreMarks.lastLoaded'));
+    loadData(localStorage.getItem('CoreMarks.lastLoaded'));
+  }
 });
     </script>
   </body>
